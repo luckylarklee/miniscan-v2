@@ -1,0 +1,22 @@
+from vulns import *
+
+# So, here's a sample vuln class without all the comments so you can read it cleanly.
+class vuln_class(vuln):
+	test_strings = ["<test-string>","<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><!DOCTYPE foo [<!ENTITY file SYSTEM \"file:///proc/1/status\">]><foo>&file;</foo>"]
+	responses_pos=["test","boot.ini","root","<test-string>"]
+	responses_neg=["error","Error"]
+	
+	def test_vuln(self,target):
+		print "Scanning for XXE..."
+		if not self.live_test(target):
+			return
+		xxe_test=self.send_scan_body(target)
+		xxe_test2=self.send_scan_append(target)
+		for i in xxe_test2:
+			xxe_test.append(i)
+		if xxe_test is None:
+			return
+		for i in xxe_test:
+			for j in self.responses_pos:
+				if j in i:
+					print "VULN!"
